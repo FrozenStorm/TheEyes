@@ -990,6 +990,19 @@ CONFIG_BT_BLE_42_FEATURES_SUPPORTED=y
 # end of LCD Configuration
 
 #
+# Realistic Eyes
+#
+# default:
+CONFIG_EYES_REALISTIC=y
+# default:
+CONFIG_EYES_IRIS_HAZEL=y
+# default:
+# CONFIG_EYES_IRIS_BLUE is not set
+# default:
+# CONFIG_EYES_IRIS_BROWN is not set
+# end of Realistic Eyes
+
+#
 # Compiler options
 #
 # default:

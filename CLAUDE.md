@@ -25,7 +25,13 @@ The config lives in `sdkconfig`. `sdkconfig.defaults` holds the baseline. Import
 
 All code is in the single `main` component. Each new `.c` file must be added by hand to `SOURCES` in `main/CMakeLists.txt`, and each new directory to `INCLUDE_DIRS`. Nothing is globbed. The GC9A01A and CST816 sources are only added when `CONFIG_WAVESHARE_1_28INCH_TOUCH_LCD` is set.
 
-Boot sequence (`main/main.c`): `BAT_Init` → `I2C_Init` → `LCD_INIT` → `LVGL_Init` → `Animated_Eye1` (builds the UI) → `LVGL_Start`.
+Boot sequence (`main/main.c`): `BAT_Init` → `I2C_Init` → `LCD_INIT`, then either `RealEyes_Start()` (when `CONFIG_EYES_REALISTIC`, the default) or the LVGL path `LVGL_Init` → `Animated_Eye1` → `LVGL_Start`. Only one of these may own the panels.
+
+- **Realistic eyes** (`main/RealEyes/`, menuconfig "Realistic Eyes"): renders without LVGL.
+  - `Eye_Textures.c` builds all textures procedurally at boot: a polar iris texture (rings × angles), one sclera texture per eye (larger than the screen, with veins and spherical shading), and a polar lookup table (distance and angle around the iris centre). They live in PSRAM; the iris prefers internal RAM.
+  - `Eye_Motion.c` is a shared, mutex-protected model that runs a fixation/saccade state machine, blinks, and pupil size with hippus. Both eyes read the same pose.
+  - `RealEyes.c` has one task per eye, pinned to core 0 and core 1. Each frame it renders per pixel in 20-line strips: lids, sclera shifted by the gaze, iris via the polar LUT with foreshortening, a fixed corneal highlight, lid shadows and a vignette. It then sends the strips with `esp_lcd_panel_draw_bitmap`. Ping-pong buffers are safe because the SPI panel IO's `tx_param` waits for this panel's previous transfers.
+  - Output is byte-swapped RGB565. The RealEyes sources are compiled with `-O2` (see `main/CMakeLists.txt`); the rest of the project uses `-Og`.
 
 - **Two displays on one SPI bus**: `LCD_Driver/GC9A01A/GC9A01A.c` sets up SPI2 once in `LCD_Init()`. `LCD2_Init()` then attaches a second panel IO on the same bus. The panels share DC, SCLK and MOSI and have separate CS, RST and backlight pins. The results are the globals `panel_handle` and `panel_handle2`. Each panel sets its own mirror/swap_xy for the chosen rotation, and the second panel is mirrored relative to the first. Pin definitions are in `GC9A01A.h`.
 - **Backlights**: LEDC channels 0 and 1 share timer 0 (`LCD_Driver.c`). `Set_Backlight(0..100)` drives both.

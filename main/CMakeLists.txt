@@ -12,6 +12,10 @@ set(SOURCES
     
     "./LVGL_UI/Eyes_Data/AA.c"
     "./LVGL_UI/lv_fs_port.c"
+
+    "./RealEyes/RealEyes.c"
+    "./RealEyes/Eye_Textures.c"
+    "./RealEyes/Eye_Motion.c"
 )
 
 set(INCLUDE_DIRS 
@@ -22,6 +26,7 @@ set(INCLUDE_DIRS
     "./I2C_Driver"
     "./BAT_Driver"
     "./Wireless"
+    "./RealEyes"
     "."
 )
  
@@ -42,4 +47,11 @@ endif()
 idf_component_register(
     SRCS ${SOURCES}
     INCLUDE_DIRS ${INCLUDE_DIRS}
+)
+
+# Per-pixel rendering and texture generation are far too slow at the project's -Og
+set_source_files_properties(
+    "./RealEyes/RealEyes.c"
+    "./RealEyes/Eye_Textures.c"
+    PROPERTIES COMPILE_OPTIONS "-O2"
 )

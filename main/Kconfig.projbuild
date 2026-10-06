@@ -65,3 +65,25 @@ menu "LCD Configuration"
         default y 
     
 endmenu
+
+menu "Realistic Eyes"
+    config EYES_REALISTIC
+        bool "Use the realistic eye renderer (bypasses LVGL)"
+        default y
+        help
+            Renders textured eyes with saccades, blinking and pupil changes directly
+            to both panels. If disabled, the original LVGL canvas animation runs.
+
+    choice EYES_IRIS_COLOR
+        prompt "Iris colour"
+        default EYES_IRIS_HAZEL
+        depends on EYES_REALISTIC
+
+    config EYES_IRIS_HAZEL
+        bool "Hazel / green"
+    config EYES_IRIS_BLUE
+        bool "Blue"
+    config EYES_IRIS_BROWN
+        bool "Brown"
+    endchoice
+endmenu

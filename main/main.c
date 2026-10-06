@@ -2,6 +2,7 @@
 #include "LCD_Driver.h"
 #include "BAT_Driver.h"
 #include "Wireless.h"
+#include "RealEyes.h"
 
 
 void Driver_Init(void)
@@ -15,12 +16,16 @@ void app_main(void)
     Driver_Init();
 
     LCD_INIT();
+#if CONFIG_EYES_REALISTIC
+    RealEyes_Start();
+#else
     LVGL_Init();   // returns the screen object
 // // /********************* Demo *********************/
     Animated_Eye1();
 
     vTaskDelay(pdMS_TO_TICKS(100));
     LVGL_Start();
+#endif
     while (1) {
         // raise the task priority of LVGL and/or reduce the handler period can improve the performance
         vTaskDelay(pdMS_TO_TICKS(100));
