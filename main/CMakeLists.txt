@@ -16,6 +16,7 @@ set(SOURCES
     "./RealEyes/RealEyes.c"
     "./RealEyes/Eye_Textures.c"
     "./RealEyes/Eye_Motion.c"
+    "./GazeLink/GazeLink.c"
 )
 
 set(INCLUDE_DIRS 
@@ -27,6 +28,8 @@ set(INCLUDE_DIRS
     "./BAT_Driver"
     "./Wireless"
     "./RealEyes"
+    "./GazeLink"
+    "../common"
     "."
 )
  

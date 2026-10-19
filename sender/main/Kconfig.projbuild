@@ -1,0 +1,25 @@
+menu "Face Sender"
+    config SENDER_CHANNEL
+        int "Wi-Fi channel"
+        range 1 13
+        default 1
+        help
+            Must match "Gaze Link" channel on the eye board.
+
+    config SENDER_TEST_PATTERN
+        bool "Test pattern instead of camera"
+        default n
+        help
+            Sends a slowly wandering target (and a 4 s gap every 20 s) without using
+            the camera, to test the eye board on its own.
+
+    config SENDER_HMIRROR
+        bool "Mirror camera image horizontally"
+        default n
+        depends on !SENDER_TEST_PATTERN
+
+    config SENDER_VFLIP
+        bool "Flip camera image vertically"
+        default n
+        depends on !SENDER_TEST_PATTERN
+endmenu

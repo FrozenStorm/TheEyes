@@ -31,12 +31,23 @@ Boot sequence (`main/main.c`): `BAT_Init` → `I2C_Init` → `LCD_INIT`, then ei
   - `Eye_Textures.c` builds all textures procedurally at boot: a polar iris texture (rings × angles), one sclera texture per eye (larger than the screen, with veins and spherical shading), and a polar lookup table (distance and angle around the iris centre). They live in PSRAM; the iris prefers internal RAM.
   - `Eye_Motion.c` is a shared, mutex-protected model that runs a fixation/saccade state machine, blinks, and pupil size with hippus. Both eyes read the same pose.
   - `RealEyes.c` has one task per eye, pinned to core 0 and core 1. Each frame it renders per pixel in 20-line strips: lids, sclera shifted by the gaze, iris via the polar LUT with foreshortening, a fixed corneal highlight, lid shadows and a vignette. It then sends the strips with `esp_lcd_panel_draw_bitmap`. Ping-pong buffers are safe because the SPI panel IO's `tx_param` waits for this panel's previous transfers.
+  - **Gaze link** (`main/GazeLink/`, menuconfig "Realistic Eyes → Gaze Link"): Wi-Fi STA on a fixed channel plus an ESP-NOW receive callback. It stores the latest camera target, already mapped to eye gaze pixels (gain/invert from Kconfig). `Eye_Motion.c` turns that into attention: while a face is fresh or within `FACE_HOLD_MS` of being seen, ~80 % of saccades go to the face (with an eyes/mouth offset), small face movements are followed by pursuit, and big ones trigger a corrective saccade. Otherwise the free-looking behaviour applies.
   - Output is byte-swapped RGB565. The RealEyes sources are compiled with `-O2` (see `main/CMakeLists.txt`); the rest of the project uses `-Og`.
 
 - **Two displays on one SPI bus**: `LCD_Driver/GC9A01A/GC9A01A.c` sets up SPI2 once in `LCD_Init()`. `LCD2_Init()` then attaches a second panel IO on the same bus. The panels share DC, SCLK and MOSI and have separate CS, RST and backlight pins. The results are the globals `panel_handle` and `panel_handle2`. Each panel sets its own mirror/swap_xy for the chosen rotation, and the second panel is mirrored relative to the first. Pin definitions are in `GC9A01A.h`.
 - **Backlights**: LEDC channels 0 and 1 share timer 0 (`LCD_Driver.c`). `Set_Backlight(0..100)` drives both.
 - **LVGL** (`LVGL_Driver/LVGL_Driver.c`): two `lv_disp_t` objects, the globals `disp` and `disp2`. Each has its own pair of PSRAM draw buffers, `full_refresh = 1`, and the panel handle stored in `user_data`, so both share one `flush_cb`. The tick comes from a 2 ms `esp_timer`. `lv_timer_handler()` runs in its own task (`LVGL_Start`, core 1, priority 2, 10 ms period). LVGL calls are not mutex-protected, so do any UI work inside LVGL timers/callbacks, not from other tasks.
 - **Eye UI** (`LVGL_UI/Animated_Eye1.c`): each eye is an `lv_canvas`, centered on its display's active screen (`tv` and `tv2`), with a buffer from `lv_mem_alloc`. A 50 ms `lv_timer` moves eye 1's pupil toward a random target that changes every `MOVE_INTERVAL`. Eye 2 copies eye 1's position, then both canvases are redrawn completely (sclera, iris, pupil, highlight). Tunables are `#define`s at the top of the file. `blink_state` and `blink_timer` exist but nothing uses them yet.
+
+### Face sender (`sender/`)
+
+This is a separate ESP-IDF project for the **XIAO ESP32S3 Sense** camera module. Build it with `idf.py -C sender build` or from inside `sender/`.
+
+- It uses `esp32-camera` (QVGA RGB565) and `esp-dl` `human_face_detect`.
+- It broadcasts `gaze_msg_t` over ESP-NOW for every processed frame. The look-at point is between the eyes, taken from the two highest keypoints. When several faces are visible it sticks to the one nearest the previous target.
+- `CONFIG_SENDER_TEST_PATTERN` sends a synthetic wandering target instead of using the camera.
+- The packet layout is defined once in `common/gaze_msg.h` and included by both projects. Bump `GAZE_MSG_VERSION` whenever it changes.
+- The Wi-Fi channel must match on both sides.
 
 Present but inactive (compiled, not called from `main`):
 - Touch (`TOUCH_INIT`, CST816 on I2C0 and I2C1, and the LVGL indev registration in `LVGL_Init`, which is commented out).

@@ -3,6 +3,7 @@
 #include "BAT_Driver.h"
 #include "Wireless.h"
 #include "RealEyes.h"
+#include "GazeLink.h"
 
 
 void Driver_Init(void)
@@ -18,6 +19,9 @@ void app_main(void)
     LCD_INIT();
 #if CONFIG_EYES_REALISTIC
     RealEyes_Start();
+#if CONFIG_GAZE_LINK_ENABLED
+    GazeLink_Init();
+#endif
 #else
     LVGL_Init();   // returns the screen object
 // // /********************* Demo *********************/

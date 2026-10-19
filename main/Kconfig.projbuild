@@ -86,4 +86,50 @@ menu "Realistic Eyes"
     config EYES_IRIS_BROWN
         bool "Brown"
     endchoice
+
+    menu "Gaze Link (ESP-NOW face tracking)"
+        depends on EYES_REALISTIC
+
+        config GAZE_LINK_ENABLED
+            bool "Receive look-at targets from the face-tracking camera"
+            default y
+            help
+                Listens for ESP-NOW packets from the camera module (see sender/). While a
+                face is reported, most saccades go to it; otherwise the eyes look around freely.
+
+        config GAZE_LINK_CHANNEL
+            int "Wi-Fi channel"
+            range 1 13
+            default 1
+            depends on GAZE_LINK_ENABLED
+            help
+                Must match the channel configured in the sender.
+
+        config GAZE_LINK_GAIN_X
+            int "Horizontal gain (%)"
+            range 10 300
+            default 100
+            depends on GAZE_LINK_ENABLED
+            help
+                100 maps the full camera image width to the full horizontal eye range.
+
+        config GAZE_LINK_GAIN_Y
+            int "Vertical gain (%)"
+            range 10 300
+            default 100
+            depends on GAZE_LINK_ENABLED
+
+        config GAZE_LINK_INVERT_X
+            bool "Invert horizontal direction"
+            default y
+            depends on GAZE_LINK_ENABLED
+            help
+                The camera looks out from the face, so a person on the camera image's left
+                stands on the viewer's right. Toggle if the eyes look away from you.
+
+        config GAZE_LINK_INVERT_Y
+            bool "Invert vertical direction"
+            default n
+            depends on GAZE_LINK_ENABLED
+    endmenu
 endmenu
