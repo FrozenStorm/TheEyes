@@ -6,3 +6,5 @@ managed_components/
 
 # Backup written by menuconfig
 sdkconfig.old
+hardware/vendor/
+hardware/enclosure/__pycache__/
