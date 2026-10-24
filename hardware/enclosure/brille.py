@@ -67,7 +67,7 @@ BATT_W, BATT_H, BATT_T = 50.5, 34.5, 6.5   # LiPo 603450 incl. tolerance
 SWITCH = (8.8, 4.0)      # SS12D00 slide switch body seen from below
 
 # Hat mount
-HAT_R = 75.0             # radius of the hat crown at the front (measure your hat!)
+HAT_R = 87.5             # radius of the hat crown at the front (measured on Daniel's hat)
 TILT = 5.0               # goggles tilted down by this many degrees
 SADDLE_W, SADDLE_H, SADDLE_T = 76.0, 36.0, 3.0
 MAGNET_D, MAGNET_T = 10.2, 3.2      # 10x3 mm neodymium discs + clearance

@@ -54,7 +54,7 @@ Laden: über die USB-C-Buchse des Augen-Boards. Sie ist unten im Nasenbogen erre
 
 Die wichtigsten Parameter stehen oben in `brille.py`:
 
-- `HAT_R`: Radius der Hutkrone vorne (Standard 75 mm). Bitte am eigenen Hut nachmessen.
+- `HAT_R`: Radius der Hutkrone vorne (87,5 mm, an Daniels Hut gemessen).
 - `TILT`: Neigung nach unten (Standard 5°). Augen und Kamera schauen damit leicht auf die Passanten herunter.
 - `DISP_FRONT`, `STANDOFF_L`: Display-Höhe vor der Platine und Länge der Abstandsbolzen. Wenn die Displays wackeln oder drücken, hier anpassen.
 - `XIAO_T`, `BATT_*`: Platz für XIAO und Akku. Ein dickerer Akku macht nur den Rückdeckel tiefer.
